@@ -151,4 +151,6 @@ def gscommands_gen(root_path=None, download=False):
     """
     if root_path is None:
         root_path = os.path.join(os.getcwd(), "dataset")
+        if not os.path.exists(root_path):
+            os.mkdir(root_path)
     return gen_dataloaders(root_path=root_path, download=download)
