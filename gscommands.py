@@ -84,9 +84,10 @@ def load_speechcommands_item(filepath: str, path: str) -> Tuple[th.Tensor, int, 
         # pad early with zeros in case the sequence is shorter than 16000 samples
         wave = th.zeros([1,SAMPLE_LENGTH])
         wave[0,-waveform.shape[1]:] = waveform
-    waveform = th.squeeze(wave)
+        waveform = wave
+    waveform = th.squeeze(waveform)
     # return waveform, sample_rate, label, speaker_id, utterance_number
-    return waveform, CLASSES[label]
+    return waveform., CLASSES[label]
 
 class GoogleCommands(utils.data.Dataset):
     """
