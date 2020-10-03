@@ -17,6 +17,7 @@ EXCEPT_FOLDER = "_background_noise_"
 TRAIN_FOLDER = "train"
 VALID_FOLDER = "valid"
 TEST_FOLDER = "test"
+SAMPLE_LENGTH = 16000
 
 # Some utility function
 def move_files(original_folder, data_folder, data_filename):
@@ -73,7 +74,13 @@ def load_speechcommands_item(filepath: str, path: str) -> Tuple[th.Tensor, int, 
 
     # Load audio
     waveform, sample_rate = torchaudio.load(filepath)
-    return waveform, sample_rate, label, speaker_id, utterance_number
+    if (waveform.shape[1] < SAMPLE_LENGTH):
+        # pad early with zeros in case the sequence is shorter than 16000 samples
+        wave = th.zeros([1,SAMPLE_LENGTH])
+        wave[0,-waveform.shape[1]:] = waveform
+        waveform = wave
+    # return waveform, sample_rate, label, speaker_id, utterance_number
+    return waveform, label
 
 class GoogleCommands(utils.data.Dataset):
     """
