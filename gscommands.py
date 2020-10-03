@@ -87,7 +87,7 @@ def load_speechcommands_item(filepath: str, path: str) -> Tuple[th.Tensor, int, 
         waveform = wave
     waveform = th.squeeze(waveform)
     # return waveform, sample_rate, label, speaker_id, utterance_number
-    return waveform., CLASSES[label]
+    return waveform, CLASSES[label]
 
 class GoogleCommands(utils.data.Dataset):
     """
