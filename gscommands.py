@@ -143,10 +143,10 @@ def gen_dataloaders(root_path,
                                             shuffle=True)
     return train_dataloader, val_dataloader, test_dataloader
 
-def gscommands_gen():
+def gscommands_gen(root_path='./dataset/.', download=False):
     """
     Create dataloaders for the Google Speech Commands task. Each item is a tuple of the form:
     waveform, sample_rate, label, speaker_id, utterance_number.
     Return train, validation and test dataloaders
     """
-    return gen_dataloaders(root_path='./dataset/.')
+    return gen_dataloaders(root_path=root_path, download=download)
