@@ -18,6 +18,7 @@ TRAIN_FOLDER = "train"
 VALID_FOLDER = "valid"
 TEST_FOLDER = "test"
 SAMPLE_LENGTH = 16000
+CLASSES = {}
 
 # Some utility function
 def move_files(original_folder, data_folder, data_filename):
@@ -46,6 +47,11 @@ def create_train_folder(original_folder, data_folder, test_folder):
 def make_dataset(gcommands_folder, out_path):
     validation_path = os.path.join(gcommands_folder, 'validation_list.txt')
     test_path = os.path.join(gcommands_folder, 'testing_list.txt')
+    directory_contents = os.listdir(gcommands_folder)
+    for idx,item in enumerate(directory_contents):
+      if os.path.isdir(gcommands_folder+'/'+item):
+        CLASSES[item] = idx
+    CLASSES.pop(EXCEPT_FOLDER,None)
 
     valid_folder = os.path.join(out_path, VALID_FOLDER)
     test_folder = os.path.join(out_path, TEST_FOLDER)
@@ -80,7 +86,7 @@ def load_speechcommands_item(filepath: str, path: str) -> Tuple[th.Tensor, int, 
         wave[0,-waveform.shape[1]:] = waveform
         waveform = wave
     # return waveform, sample_rate, label, speaker_id, utterance_number
-    return waveform, label
+    return waveform, CLASSES[label]
 
 class GoogleCommands(utils.data.Dataset):
     """
