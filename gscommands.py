@@ -126,9 +126,9 @@ def gen_dataloaders(root_path,
         P.print_message("Looks like dataset folder is missing. You may want check and enable download")
     else:
       # first download the dataset
-      if os.path.exists(src_path):
+      if os.path.exists(root_path):
         shutil.rmtree(root_path)
-    
+        os.mkdir(root_path)
       # Download the dataset using the default dataset from Pytorch audio
       _ = torchaudio.datasets.SPEECHCOMMANDS(root=root_path,
                                                         download=True)
@@ -171,4 +171,8 @@ def gscommands_gen(root_path=None,
         root_path = os.path.join(os.getcwd(), "dataset")
         if not os.path.exists(root_path):
             os.mkdir(root_path)
-    return gen_dataloaders(root_path=root_path, download=download)
+    return gen_dataloaders( root_path=root_path, 
+                            download=download, 
+                            train_batch_size=train_batch_size,
+                            test_batch_size=test_batch_size,
+                            val_batch_size=val_batch_size)
