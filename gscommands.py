@@ -7,6 +7,7 @@ from torchaudio.datasets.utils import walk_files
 import os
 import shutil
 import argparse
+import pickle
 
 from typing import Tuple
 from nnchassis import PrintUtils as P
@@ -18,7 +19,7 @@ TRAIN_FOLDER = "train"
 VALID_FOLDER = "valid"
 TEST_FOLDER = "test"
 SAMPLE_LENGTH = 16000
-CLASSES = {}
+CLASSES_FILE = "classes.pickle"
 
 # Some utility function
 def move_files(original_folder, data_folder, data_filename):
@@ -48,10 +49,11 @@ def make_dataset(gcommands_folder, out_path):
     validation_path = os.path.join(gcommands_folder, 'validation_list.txt')
     test_path = os.path.join(gcommands_folder, 'testing_list.txt')
     directory_contents = os.listdir(gcommands_folder)
+    classes = {}
     for idx,item in enumerate(directory_contents):
       if os.path.isdir(gcommands_folder+'/'+item):
-        CLASSES[item] = idx
-    CLASSES.pop(EXCEPT_FOLDER,None)
+        classes[item] = idx
+    classes.pop(EXCEPT_FOLDER,None)
 
     valid_folder = os.path.join(out_path, VALID_FOLDER)
     test_folder = os.path.join(out_path, TEST_FOLDER)
@@ -69,25 +71,9 @@ def make_dataset(gcommands_folder, out_path):
     move_files(gcommands_folder, test_folder, test_path)
     move_files(gcommands_folder, valid_folder, validation_path)
     create_train_folder(gcommands_folder, train_folder, test_folder)
-
-def load_speechcommands_item(filepath: str, path: str) -> Tuple[th.Tensor, int, str, str, int]:
-    relpath = os.path.relpath(filepath, path)
-    label, filename = os.path.split(relpath)
-    speaker, _ = os.path.splitext(filename)
-
-    speaker_id, utterance_number = speaker.split(HASH_DIVIDER)
-    utterance_number = int(utterance_number)
-
-    # Load audio
-    waveform, sample_rate = torchaudio.load(filepath)
-    if (waveform.shape[1] < SAMPLE_LENGTH):
-        # pad early with zeros in case the sequence is shorter than 16000 samples
-        wave = th.zeros([1,SAMPLE_LENGTH])
-        wave[0,-waveform.shape[1]:] = waveform
-        waveform = wave
-    waveform = th.squeeze(waveform)
-    # return waveform, sample_rate, label, speaker_id, utterance_number
-    return waveform, CLASSES[label]
+    classes_file_path = os.path.join(gcommands_folder, CLASSES_FILE)
+    with open(classes_file_path, 'wb') as handle:
+        pickle.dump(classes, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 class GoogleCommands(utils.data.Dataset):
     """
@@ -100,16 +86,39 @@ class GoogleCommands(utils.data.Dataset):
                  download: bool = False) -> None:
 
         self._path = os.path.join(root_path)
+        classes_file_path = os.path.join(gcommands_folder, CLASSES_FILE)
+
         walker = walk_files(self._path, suffix=".wav", prefix=True)
         walker = filter(lambda w: HASH_DIVIDER in w and EXCEPT_FOLDER not in w, walker)
         self._walker = list(walker)
+        with open(classes_file_path, 'rb') as handle:
+            self.classes = pickle.load(handle)
 
     def __getitem__(self, n: int) -> Tuple[th.Tensor, int, str, str, int]:
         fileid = self._walker[n]
-        return load_speechcommands_item(fileid, self._path)
+        return self.load_speechcommands_item(fileid, self._path)
 
     def __len__(self) -> int:
         return len(self._walker)
+
+    def load_speechcommands_item(self, filepath: str, path: str) -> Tuple[th.Tensor, int, str, str, int]:
+        relpath = os.path.relpath(filepath, path)
+        label, filename = os.path.split(relpath)
+        speaker, _ = os.path.splitext(filename)
+
+        speaker_id, utterance_number = speaker.split(HASH_DIVIDER)
+        utterance_number = int(utterance_number)
+
+        # Load audio
+        waveform, sample_rate = torchaudio.load(filepath)
+        if (waveform.shape[1] < SAMPLE_LENGTH):
+            # pad early with zeros in case the sequence is shorter than 16000 samples
+            wave = th.zeros([1,SAMPLE_LENGTH])
+            wave[0,-waveform.shape[1]:] = waveform
+            waveform = wave
+        waveform = th.squeeze(waveform)
+        # return waveform, sample_rate, label, speaker_id, utterance_number
+        return waveform, self.classes[label]    
 
 def gen_dataloaders(root_path,
                     train_batch_size=32, 
