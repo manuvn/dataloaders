@@ -19,6 +19,7 @@ TRAIN_FOLDER = "train"
 VALID_FOLDER = "valid"
 TEST_FOLDER = "test"
 SAMPLE_LENGTH = 16000
+CLASSES_FILE = "classes.pickle"
 
 # Some utility function
 def move_files(original_folder, data_folder, data_filename):
@@ -45,7 +46,6 @@ def create_train_folder(original_folder, data_folder, test_folder):
 
 
 def make_dataset(gcommands_folder, out_path):
-    classes_file = "classes.pickle"
     validation_path = os.path.join(gcommands_folder, 'validation_list.txt')
     test_path = os.path.join(gcommands_folder, 'testing_list.txt')
     directory_contents = os.listdir(gcommands_folder)
@@ -68,15 +68,15 @@ def make_dataset(gcommands_folder, out_path):
     if not os.path.exists(train_folder):
         os.mkdir(train_folder)
 
-    with open(classes_file, 'wb') as handle:
+    with open(CLASSES_FILE, 'wb') as handle:
         pickle.dump(classes, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     move_files(gcommands_folder, test_folder, test_path)
     move_files(gcommands_folder, valid_folder, validation_path)
     create_train_folder(gcommands_folder, train_folder, test_folder)
-    shutil.copy(classes_file, test_folder)
-    shutil.copy(classes_file, train_folder)
-    shutil.copy(classes_file, valid_folder)
+    shutil.copy(CLASSES_FILE, test_folder)
+    shutil.copy(CLASSES_FILE, train_folder)
+    shutil.copy(CLASSES_FILE, valid_folder)
 
 class GoogleCommands(utils.data.Dataset):
     """
