@@ -139,14 +139,19 @@ def gen_dataloaders(root_path,
     else:
       # first download the dataset
       if os.path.exists(root_path):
-        shutil.rmtree(root_path)
-        os.mkdir(root_path)
-      # Download the dataset using the default dataset from Pytorch audio
-      _ = torchaudio.datasets.SPEECHCOMMANDS(root=root_path,
-                                                        download=True)
-
-      # then separate the test, train and validation sets
-      make_dataset(gcommands_folder=src_path, out_path=out_path)
+        download_marker_file = os.path.join(root_path, "downloaded")
+        if os.path.isfile(download_marker_file):
+            redownload = input("Database seems to have been downloaded. Should I wipe and download [y|n]?:")
+            if redownload == "y" or redownload == "Y":
+                shutil.rmtree(root_path)
+                os.mkdir(root_path)
+                # Download the dataset using the default dataset from Pytorch audio
+                _ = torchaudio.datasets.SPEECHCOMMANDS(root=root_path,download=True)
+                # then separate the test, train and validation sets
+                make_dataset(gcommands_folder=src_path, out_path=out_path)
+                dld_mark = open(download_marker_file, "w")
+                dld_mark.write("True")
+                dld_mark.close()
 
     # Now create thed dataloaders
     train_path = os.path.join(out_path, TRAIN_FOLDER)
