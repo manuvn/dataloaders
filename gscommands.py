@@ -54,7 +54,6 @@ def make_dataset(gcommands_folder, out_path):
     for _,item in enumerate(directory_contents):
         if os.path.isdir(gcommands_folder+'/'+item):
             if not item == EXCEPT_FOLDER:
-              print(item)
               classes[item] = class_idx
               class_idx += 1
     # classes.pop(EXCEPT_FOLDER,None)
