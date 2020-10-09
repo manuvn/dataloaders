@@ -52,10 +52,12 @@ def make_dataset(gcommands_folder, out_path):
     classes = {}
     class_idx = 0
     for _,item in enumerate(directory_contents):
-      if os.path.isdir(gcommands_folder+'/'+item):
-        classes[item] = class_idx
-        class_idx += 1
-    classes.pop(EXCEPT_FOLDER,None)
+        if os.path.isdir(gcommands_folder+'/'+item):
+            if not item == EXCEPT_FOLDER:
+              print(item)
+              classes[item] = class_idx
+              class_idx += 1
+    # classes.pop(EXCEPT_FOLDER,None)
 
     valid_folder = os.path.join(out_path, VALID_FOLDER)
     test_folder = os.path.join(out_path, TEST_FOLDER)
