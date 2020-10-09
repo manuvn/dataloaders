@@ -49,6 +49,7 @@ def make_dataset(gcommands_folder, out_path):
     validation_path = os.path.join(gcommands_folder, 'validation_list.txt')
     test_path = os.path.join(gcommands_folder, 'testing_list.txt')
     directory_contents = os.listdir(gcommands_folder)
+    classes = {}
     class_idx = 0
     for _,item in enumerate(directory_contents):
       if os.path.isdir(gcommands_folder+'/'+item):
