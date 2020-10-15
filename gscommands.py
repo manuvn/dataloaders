@@ -175,7 +175,7 @@ def gen_dataloaders(root_path,
 
     test_dataloader = utils.data.DataLoader(test_dataset, 
                                             batch_size=test_batch_size, 
-                                            shuffle=True)
+                                            shuffle=False)
     return train_dataloader, val_dataloader, test_dataloader
 
 def gscommands_gen(root_path=None, 
