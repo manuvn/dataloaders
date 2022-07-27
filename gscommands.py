@@ -2,7 +2,7 @@ import torch as th
 import torchaudio
 from torch import utils
 from torchaudio import transforms
-from torchaudio.datasets.utils import walk_files
+# from torchaudio.datasets.utils import walk_files
 
 import os
 import shutil
@@ -94,8 +94,11 @@ class GoogleCommands(utils.data.Dataset):
         self._path = os.path.join(root_path)
         classes_file_path = os.path.join(root_path, CLASSES_FILE)
 
-        walker = walk_files(self._path, suffix=".wav", prefix=True)
-        walker = filter(lambda w: HASH_DIVIDER in w and EXCEPT_FOLDER not in w, walker)
+#         walker = walk_files(self._path, suffix=".wav", prefix=True)
+#         walker = filter(lambda w: HASH_DIVIDER in w and EXCEPT_FOLDER not in w, walker)
+        
+        walker = sorted(str(p) for p in Path(self._path).glob('*.wav'))
+        
         self._walker = list(walker)
         with open(classes_file_path, 'rb') as handle:
             self.classes = pickle.load(handle)
