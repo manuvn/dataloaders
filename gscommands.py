@@ -99,8 +99,9 @@ class GoogleCommands(utils.data.Dataset):
 #         walker = walk_files(self._path, suffix=".wav", prefix=True)
 #         walker = filter(lambda w: HASH_DIVIDER in w and EXCEPT_FOLDER not in w, walker)
         
-        walker = sorted(str(p) for p in Path(self._path).glob('*.wav'))
-        
+        walker = sorted(str(p) for p in Path(self._path).rglob('*.wav'))
+        walker = filter(lambda w: HASH_DIVIDER in w and EXCEPT_FOLDER not in w, walker)
+
         self._walker = list(walker)
         with open(classes_file_path, 'rb') as handle:
             self.classes = pickle.load(handle)
